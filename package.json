@@ -1,0 +1,26 @@
+{
+  "name": "node-sqliter",
+  "description": "wrapper of node-sqlite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "homepage": "http://kuroeveryday.blogspot.com",
+  "scripts": {
+    "test": "gulp test",
+    "build": "gulp build",
+    "watch": "gulp watch"
+  },
+  "author": "BcRikko (https://github.com/BcRikko)",
+  "license": "MIT",
+  "dependencies": {
+    "sqlite3": "^3.1.4"
+  },
+  "devDependencies": {
+    "del": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-plumber": "^1.1.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-typescript": "^2.13.6",
+    "mocha": "^2.5.3",
+    "typescript": "^1.8.10"
+  }
+}

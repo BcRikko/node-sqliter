@@ -1,0 +1,20 @@
+{
+  "version": "0.1.0",
+  "command": "npm",
+  "isShellCommand": true,
+  "args": [
+    "--no-color"
+  ],
+  "tasks": [
+    {
+      "taskName": "run",
+      "args": ["build"],
+      "isBuildCommand": true,
+      "isWatching": true,
+      "problemMatcher": [
+        "$tsc"
+      ]
+    }
+  ]
+
+}
