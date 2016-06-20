@@ -75,14 +75,14 @@ describe('node-sqliter', () => {
         const query = `select * from ${tableName} where ${wheres.join(' ')}`;
 
         const find = new Promise((resolve, reject) => {
-            db.find(tableName,  wheres, (err, res) => {
-                resolve(res);
+            db.find(tableName,  wheres, (err, row) => {
+                resolve(row);
             });
         });
         find.then((result) => {
-            db3.get(query, (err, res) => {
-                expect(result['id']).to.be.eq(res['id']);
-                expect(result['name']).to.be.eq(res['name']);
+            db3.get(query, (err, row) => {
+                expect(result['id']).to.be.eq(row['id']);
+                expect(result['name']).to.be.eq(row['name']);
                 done();
             });
         });

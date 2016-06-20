@@ -29,7 +29,7 @@ class Sqliter {
         this._db = new sqlite3.Database(filename);
     }
 
-    createTable (tableName: string, models: Model[], callback?: Function) {
+    createTable (tableName: string, models: Model[], callback?: (err: Error) => void) {
         const params = models.map(model => {
             return [
                 model.field,
@@ -43,7 +43,7 @@ class Sqliter {
         this._db.run(query, callback);
     }
 
-    save (tableName: string, models: any, callback?: Function) {
+    save (tableName: string, models: any, callback?: (err: Error) => void) {
         const keys = Object.keys(models);
         const values = keys.map((key) => { return `"${models[key]}"`; });
 
@@ -52,10 +52,30 @@ class Sqliter {
         this._db.run(query, callback);
     }
 
-    find (tableName: string, wheres: any, callback?: Function) {
+    find (tableName: string, wheres: any, callback?: (err: Error, row: any) => void) {
         const query = `SELECT * FROM ${tableName} WHERE ${wheres.join(' ')}`;
 
         this._db.get(query, callback);
+    }
+
+    run (query: string, callback?:  (err: Error) => void) {
+        this._db.run(query, callback);
+    }
+
+    get (query: string, callback?: (err: Error, row: any) => void) {
+        this._db.get(query, callback);
+    }
+
+    all (query: string, callback?: (err: Error, rows: any[]) => void) {
+        this._db.all(query, callback);
+    }
+
+    each (query: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void) {
+        this._db.each(query, callback, complete);
+    }
+
+    close (callback?: (err: Error) => void) {
+        this._db.close(callback);
     }
 }
 
