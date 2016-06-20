@@ -44,20 +44,18 @@ class Sqliter {
     }
 
     save (tableName: string, models: any, callback?: Function) {
-        const keys = Object.keys(models).join(',');
-        const values = ((keys) => {
-            return keys.map((key) => { return models[key]; });
-        })(keys).join(',');
+        const keys = Object.keys(models);
+        const values = keys.map((key) => { return `"${models[key]}"`; });
 
-        const query = `INSERT INTO ${tableName} ( ${keys} ) VALUES ( ${values} )`;
+        const query = `INSERT INTO ${tableName} ( ${keys.join(',')} ) VALUES ( ${values.join(',')} )`;
 
         this._db.run(query, callback);
     }
 
     find (tableName: string, wheres: any, callback?: Function) {
-        const query = `SELECT * FROM ${tableName} WHERE ${wheres.join(',')}`;
+        const query = `SELECT * FROM ${tableName} WHERE ${wheres.join(' ')}`;
 
-        this._db.run(query, callback);
+        this._db.get(query, callback);
     }
 }
 

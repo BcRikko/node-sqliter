@@ -9,7 +9,7 @@ const sqliter = require('../lib/node-sqliter');
 
 
 describe('node-sqliter', () => {
-    const filename = ':memory:';
+    const filename = './test/test.db';
     const tableName = 'testtable';
 
     var db, db3;
@@ -23,8 +23,8 @@ describe('node-sqliter', () => {
         del.sync([filename]);
     });
 
-    it('create table', () => {
-        const query = `select count(*) from sqlite_master where type="table" and name = ${tableName}`;
+    it('create table', (done) => {
+        const query = `select count(*) from sqlite_master where type="table" and name = "${tableName}"`;
         const model = [
             {
                 field: 'id',
@@ -37,14 +37,53 @@ describe('node-sqliter', () => {
         ];
 
         const create = new Promise((resolve, reject) => {
-            db.createTable(tableName, model, () => {
+            db.createTable(tableName, model, (err, res) => {
                 resolve();
             });
         });
-
         create.then(() => {
             db3.get(query, (err, res) => {
                 expect(res['count(*)']).to.be.eq(1);
+                done();
+            });
+        });
+    });
+
+    it('insert value', (done) => {
+        const query = `select id, name from ${tableName}`;
+        const model = {
+            id: '123',
+            name: 'test'
+        };
+
+        const save = new Promise((resolve, reject) => {
+            db.save(tableName, model, (err, res) => {
+                resolve();
+            });
+        });
+        save.then(() => {
+            db3.get(query, (err, res) => {
+                expect(res['id']).to.be.eq(123);
+                expect(res['name']).to.be.eq('test');
+                done();
+            });
+        });
+    });
+
+    it('find value', (done) => {
+        const wheres = ['id = 123'];
+        const query = `select * from ${tableName} where ${wheres.join(' ')}`;
+
+        const find = new Promise((resolve, reject) => {
+            db.find(tableName,  wheres, (err, res) => {
+                resolve(res);
+            });
+        });
+        find.then((result) => {
+            db3.get(query, (err, res) => {
+                expect(result['id']).to.be.eq(res['id']);
+                expect(result['name']).to.be.eq(res['name']);
+                done();
             });
         });
     });

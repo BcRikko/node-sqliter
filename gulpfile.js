@@ -14,7 +14,10 @@ const mocha = require('gulp-mocha');
 
 gulp.task('test', () => {
     return gulp.src(['test/*.js'], { read: false })
-        .pipe(mocha({ reporter: 'list' }));
+        .pipe(mocha({
+            reporter: 'list',
+            timeout: 5000
+        }));
 });
 
 gulp.task('clean', () => {
@@ -35,7 +38,7 @@ gulp.task('build', ['clean'], () => {
     return tsResult.js
         .pipe(babel())
         .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('./lib')); 
+        .pipe(gulp.dest('./lib'));
 });
 
 gulp.task('watch', () => {
