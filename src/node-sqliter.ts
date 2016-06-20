@@ -1,4 +1,5 @@
 /// <reference path="../typings/index.d.ts" />
+"use strict"
 
 import * as sqlite3 from "sqlite3";
 
@@ -65,6 +66,6 @@ class Sqliter {
  * @var {string} filename: DBファイルの名前
  * @return {Sqliter}
  */
-export function connect (filename: string) {
+exports.connect = (filename: string): Sqliter => {
     return new Sqliter(filename);
 };

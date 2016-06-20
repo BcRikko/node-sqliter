@@ -1,10 +1,21 @@
 /// <reference path="./typings/index.d.ts" />
 
 const gulp = require('gulp');
+
 const typescript = require('gulp-typescript');
+const tsProject = typescript.createProject('tsconfig.json');
+const babel = require('gulp-babel');
 const sourcemaps = require('gulp-sourcemaps');
 const plumber = require('gulp-plumber');
 const del = require('del');
+
+const mocha = require('gulp-mocha');
+
+
+gulp.task('test', () => {
+    return gulp.src(['test/*.js'], { read: false })
+        .pipe(mocha({ reporter: 'list' }));
+});
 
 gulp.task('clean', () => {
     return del.sync([
@@ -19,17 +30,12 @@ gulp.task('build', ['clean'], () => {
         ])
         .pipe(plumber())
         .pipe(sourcemaps.init())
-        .pipe(typescript({
-            typescript: require('typescript'),
-            target: 'es6',
-            module: 'es6',
-            removeComments: false,
-            declaration: true
-        }));
-    
-return tsResult
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('./lib')); 
+        .pipe(typescript(tsProject));
+
+    return tsResult.js
+        .pipe(babel())
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('./lib')); 
 });
 
 gulp.task('watch', () => {

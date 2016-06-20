@@ -1,0 +1,27 @@
+{
+  "env": {
+    "es6": true,
+    "node": true,
+    "mocha": true
+  },
+  "globals": { },
+  "parserOptions": {
+      "sourceType": "module"
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    "strict": 1,
+    "linebreak-style": [
+        2,
+        "unix"
+    ],
+    "semi": [
+        2,
+        "always"
+    ],
+    "no-extra-boolean-cast": 0,
+    "no-console": 0,
+    "no-unused-vars": 0,
+    "no-debugger": 2
+  }
+}

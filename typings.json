@@ -5,11 +5,12 @@
   "globalDependencies": {
     "sqlite3": "registry:dt/sqlite3#2.2.3+20160316155526"
   },
-  "devDependencies": {
-    "gulp": "registry:npm/gulp#4.0.0-alpha.2+20160615163330"
-  },
   "globalDevDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20160317120654",
+    "gulp": "registry:dt/gulp#3.8.0+20160316155526",
     "mocha": "registry:dt/mocha#2.2.5+20160317120654",
-    "node": "registry:dt/node#6.0.0+20160613154055"
+    "node": "registry:dt/node#6.0.0+20160613154055",
+    "orchestrator": "registry:dt/orchestrator#0.0.0+20160316155526",
+    "q": "registry:dt/q#0.0.0+20160613154756"
   }
 }
