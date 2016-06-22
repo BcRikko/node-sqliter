@@ -8,6 +8,11 @@ import * as sqliter from '../src/node-sqliter';
 
 const expect = chai.expect;
 
+interface IFields {
+    id: number,
+    name?: string
+}
+
 describe('node-sqliter', () => {
     const file = './test/test.db';
     const table = 'testtable';
@@ -26,7 +31,7 @@ describe('node-sqliter', () => {
 
     it('create table', (done) => {
         const query = `select count(*) from sqlite_master where type="table" and name = "${table}"`;
-        const model = [
+        const model: sqliter.IModel[] = [
             {
                 field: 'id',
                 type : sqliter.Types.INTEGER
@@ -52,13 +57,13 @@ describe('node-sqliter', () => {
 
     it('insert value', (done) => {
         const query = `select id, name from ${table}`;
-        const model = {
-            id: '1',
+        const fields: IFields = {
+            id: 1,
             name: 'test01'
         };
 
         const save = new Promise((resolve, reject) => {
-            db.save(table, model, (err) => {
+            db.save(table, fields, (err) => {
                 resolve();
             });
         });
@@ -73,14 +78,14 @@ describe('node-sqliter', () => {
 
     it('insert all', (done) => {
         const query = `select count(*) from ${table}`;
-        const models = [
-            {id: '2', name: 'test02'},
-            {id: '3', name: 'test03'},
-            {id: '4', name: 'test04'}
+        const fields: IFields[] = [
+            {id: 2, name: 'test02'},
+            {id: 3, name: 'test03'},
+            {id: 4, name: 'test04'}
         ];
 
         const saveAll = new Promise((resolve, reject) => {
-            db.saveAll(table, models, () => {
+            db.saveAll(table, fields, () => {
                 resolve();
             });
         });

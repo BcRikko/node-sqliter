@@ -11,14 +11,14 @@ export module Types {
     export const BLOB = 'BLOB';
 }
 
-export interface Model {
+export interface IModel {
     field: string,
     type: string,
     options?: string
 }
 
 export interface ISqliter {
-    createTable (tableName: string, models: Model[], callback?: (err: Error) => void);
+    createTable (tableName: string, models: IModel[], callback?: (err: Error) => void);
     save (tableName: string, model: any, callback?: (err: Error) => void);
     saveAll (tableName: string, models: any[], callback?: (err: Error) => void);
     find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void);
@@ -41,7 +41,7 @@ class Sqliter implements ISqliter{
         this._db = new sqlite3.Database(filename);
     }
 
-    createTable (tableName: string, models: Model[], callback?: (err: Error) => void) {
+    createTable (tableName: string, models: IModel[], callback?: (err: Error) => void) {
         const params = models.map(model => {
             return [
                 model.field,
