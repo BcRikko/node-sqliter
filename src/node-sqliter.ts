@@ -19,7 +19,8 @@ export interface Model {
 
 export interface ISqliter {
     createTable (tableName: string, models: Model[], callback?: (err: Error) => void);
-    save (tableName: string, models: any, callback?: (err: Error) => void);
+    save (tableName: string, model: any, callback?: (err: Error) => void);
+    saveAll (tableName: string, models: any[], callback?: (err: Error) => void);
     find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void);
     update (tableName: string, models: any[], wheres?: any[], callback?: (err: Error) => void);
     run (query: string, callback?:  (err: Error) => void);
@@ -54,13 +55,26 @@ class Sqliter implements ISqliter{
         this._db.run(query, callback);
     }
 
-    save (tableName: string, models: any, callback?: (err: Error) => void) {
-        const keys = Object.keys(models);
-        const values = keys.map((key) => { return `"${models[key]}"`; });
+    save (tableName: string, model: any, callback?: (err: Error) => void) {
+        const keys = Object.keys(model);
+        const values = keys.map((key) => { return `"${model[key]}"`; });
 
         const query = `INSERT INTO ${tableName} ( ${keys.join(',')} ) VALUES ( ${values.join(',')} )`;
 
         this._db.run(query, callback);
+    }
+
+    saveAll (tableName: string, models: any[], callback?: (err: Error) => void) {
+        const keys = Object.keys(models[0]);
+        const holder = keys.map(() => {return '?'; }).join(',');
+
+        let statement = this._db.prepare(`INSERT INTO ${tableName} ( ${keys.join(',')} ) VALUES ( ${holder} )`);
+        models.forEach((model) => {
+            const values = keys.map((key) => { return `${model[key]}`; });
+            statement.run(values);
+        });
+
+        statement.finalize(callback);
     }
 
     find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void) {
