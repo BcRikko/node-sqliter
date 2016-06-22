@@ -19,7 +19,7 @@ export interface Model {
 
 export interface ISqliter {
     createTable (tableName: string, models: Model[], callback?: (err: Error) => void);
-    save (tableName: string, models: any[], callback?: (err: Error) => void);
+    save (tableName: string, models: any, callback?: (err: Error) => void);
     find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void);
     update (tableName: string, models: any[], wheres?: any[], callback?: (err: Error) => void);
     run (query: string, callback?:  (err: Error) => void);
@@ -54,7 +54,7 @@ class Sqliter implements ISqliter{
         this._db.run(query, callback);
     }
 
-    save (tableName: string, models: any[], callback?: (err: Error) => void) {
+    save (tableName: string, models: any, callback?: (err: Error) => void) {
         const keys = Object.keys(models);
         const values = keys.map((key) => { return `"${models[key]}"`; });
 

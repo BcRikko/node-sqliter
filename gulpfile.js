@@ -11,13 +11,12 @@ const del = require('del');
 
 const mocha = require('gulp-mocha');
 
-
-gulp.task('clean', () => {
-    return del.sync(['lib']);
+gulp.task('clean-test', ['build-test'], () => {
+    return del.sync(['src/*.js', 'test/*.js']);
 });
 
-gulp.task('test', () => {
-    gulp.src(['src/**/*.ts', 'test/**/*.ts'], { base: '.' })
+gulp.task('build-test', () => {
+    return gulp.src(['test/**/*.ts', 'src/**/*.ts'], { base: '.' })
         .pipe(typescript(tsProject))
         .pipe(babel())
         .pipe(gulp.dest('.'))
@@ -25,8 +24,10 @@ gulp.task('test', () => {
             reporter: 'progress',
             timeout: 5000
         }));
+});
 
-    del.sync(['src/*.js', 'test/*.js']);
+gulp.task('clean', () => {
+    return del.sync(['lib']);
 });
 
 gulp.task('build', ['clean'], () => {
@@ -43,6 +44,8 @@ gulp.task('build', ['clean'], () => {
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('./lib'));
 });
+
+gulp.task('test', ['clean-test']);
 
 gulp.task('watch', () => {
     gulp.watch('src/**/*.ts', ['build']);

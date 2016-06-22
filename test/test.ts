@@ -25,7 +25,7 @@ describe('node-sqliter', () => {
     });
 
     it('create table', (done) => {
-        const query = `select count(*) from sqlite_master where type="table" and name = "${file}"`;
+        const query = `select count(*) from sqlite_master where type="table" and name = "${table}"`;
         const model = [
             {
                 field: 'id',
@@ -38,7 +38,7 @@ describe('node-sqliter', () => {
         ];
 
         const create = new Promise((resolve, reject) => {
-            db.createTable(file, model, (err) => {
+            db.createTable(table, model, (err) => {
                 resolve();
             });
         });
@@ -51,16 +51,14 @@ describe('node-sqliter', () => {
     });
 
     it('insert value', (done) => {
-        const query = `select id, name from ${file}`;
-        const model = [
-            {
-                id: '123',
-                name: 'test'
-            }
-        ];
+        const query = `select id, name from ${table}`;
+        const model = {
+            id: '123',
+            name: 'test'
+        };
 
         const save = new Promise((resolve, reject) => {
-            db.save(file, model, (err) => {
+            db.save(table, model, (err) => {
                 resolve();
             });
         });
@@ -75,10 +73,10 @@ describe('node-sqliter', () => {
 
     it('find value', (done) => {
         const wheres = ['id = 123'];
-        const query = `select * from ${file} where ${wheres.join(' ')}`;
+        const query = `select * from ${table} where ${wheres.join(' ')}`;
 
         const find = new Promise((resolve, reject) => {
-            db.find(file,  wheres, (err, row) => {
+            db.find(table,  wheres, (err, row) => {
                 resolve(row);
             });
         });
