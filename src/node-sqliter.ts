@@ -19,11 +19,11 @@ export interface IModel {
 
 export interface ISqliter {
     createTable (tableName: string, models: IModel[], callback?: (err: Error) => void);
-    save (tableName: string, model: any, callback?: (err: Error) => void);
-    saveAll (tableName: string, models: any[], callback?: (err: Error) => void);
+    save (tableName: string, field: any, callback?: (err: Error) => void);
+    saveAll (tableName: string, fields: any[], callback?: (err: Error) => void);
     find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void);
     findAll (tableName: string, wheres: any[], callback?: (err: Error, rows: any[]) => void);
-    update (tableName: string, models: any[], wheres?: any[], callback?: (err: Error) => void);
+    update (tableName: string, field: any, wheres?: any[], callback?: (err: Error) => void);
     run (query: string, callback?:  (err: Error) => void);
     get (query: string, callback?: (err: Error, row: any) => void);
     all (query: string, callback?: (err: Error, rows: any[]) => void);
@@ -55,21 +55,21 @@ class Sqliter implements ISqliter{
         this._db.run(query, callback);
     }
 
-    save (tableName: string, model: any, callback?: (err: Error) => void) {
-        const keys = Object.keys(model);
-        const values = keys.map((key) => { return `"${model[key]}"`; });
+    save (tableName: string, field: any, callback?: (err: Error) => void) {
+        const keys = Object.keys(field);
+        const values = keys.map((key) => { return `"${field[key]}"`; });
 
         const query = `INSERT INTO ${tableName} ( ${keys.join(',')} ) VALUES ( ${values.join(',')} )`;
 
         this._db.run(query, callback);
     }
 
-    saveAll (tableName: string, models: any[], callback?: (err: Error) => void) {
-        const keys = Object.keys(models[0]);
+    saveAll (tableName: string, fields: any[], callback?: (err: Error) => void) {
+        const keys = Object.keys(fields[0]);
         const holder = keys.map(() => {return '?'; }).join(',');
 
         let statement = this._db.prepare(`INSERT INTO ${tableName} ( ${keys.join(',')} ) VALUES ( ${holder} )`);
-        models.forEach((model) => {
+        fields.forEach((model) => {
             const values = keys.map((key) => { return `${model[key]}`; });
             statement.run(values);
         });
@@ -89,9 +89,13 @@ class Sqliter implements ISqliter{
         this._db.all(query, callback);
     }
 
-    update (tableName: string, models: any[], wheres?: any[], callback?: (err: Error) => void) {
+    update (tableName: string, field: any, wheres?: any[], callback?: (err: Error) => void) {
+        let param = [];
+        for (let key in field) {
+            param.push(`${key} = "${field[key]}"`);
+        }
 
-        const query = `UPDATE ${tableName} SET ${models} WHERE ${wheres.join(' ')}`;
+        const query = `UPDATE ${tableName} SET ${param.join(',')} WHERE ${wheres.join(' ')}`;
 
         this._db.run(query, callback);
     }

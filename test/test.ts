@@ -136,4 +136,26 @@ describe('node-sqliter', () => {
             });
         });
     });
+
+    it('update value', (done) => {
+        const wheres = ['id = 3'];
+        const query = `select * from ${table} where ${wheres.join(' ')}`;
+
+        const field = {
+            name: 'updated'
+        };
+
+        const update = new Promise((resolve, reject) => {
+            db.update(table, field, wheres, (err) => {
+                resolve();
+            });
+        });
+        update.then(() => {
+            db3.get(query, (err, row) => {
+                expect(row['name']).to.be.eq('updated');
+                done();
+            });
+        });
+    });
+
 });
