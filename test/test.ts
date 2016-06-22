@@ -114,4 +114,26 @@ describe('node-sqliter', () => {
             });
         });
     });
+
+    it('find all value', (done) => {
+        const wheres = ['id > 2'];
+        const query = `select * from ${table} where ${wheres.join(' ')}`;
+
+        const find = new Promise((resolve, reject) => {
+            db.findAll(table,  wheres, (err, rows) => {
+                resolve(rows);
+            });
+        });
+        find.then((results: any[]) => {
+            db3.all(query, (err, rows) => {
+                expect(results.length).to.be.eq(rows.length);
+
+                results.forEach((result, i) => {
+                    expect(result).to.deep.equal(rows[i]);
+                });
+
+                done();
+            });
+        });
+    });
 });

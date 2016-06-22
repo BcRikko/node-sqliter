@@ -22,6 +22,7 @@ export interface ISqliter {
     save (tableName: string, model: any, callback?: (err: Error) => void);
     saveAll (tableName: string, models: any[], callback?: (err: Error) => void);
     find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void);
+    findAll (tableName: string, wheres: any[], callback?: (err: Error, rows: any[]) => void);
     update (tableName: string, models: any[], wheres?: any[], callback?: (err: Error) => void);
     run (query: string, callback?:  (err: Error) => void);
     get (query: string, callback?: (err: Error, row: any) => void);
@@ -29,7 +30,6 @@ export interface ISqliter {
     each (query: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void);
     close (callback?: (err: Error) => void);
 }
-
 
 /**
  * Sqliter
@@ -81,6 +81,12 @@ class Sqliter implements ISqliter{
         const query = `SELECT * FROM ${tableName} WHERE ${wheres.join(' ')}`;
 
         this._db.get(query, callback);
+    }
+
+    findAll (tableName: string, wheres: any[], callback?: (err: Error, rows: any[]) => void) {
+        const query = `SELECT * FROM ${tableName} WHERE ${wheres.join(' ')}`;
+
+        this._db.all(query, callback);
     }
 
     update (tableName: string, models: any[], wheres?: any[], callback?: (err: Error) => void) {
