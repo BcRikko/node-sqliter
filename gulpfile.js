@@ -12,18 +12,21 @@ const del = require('del');
 const mocha = require('gulp-mocha');
 
 
-gulp.task('test', () => {
-    return gulp.src(['test/*.js'], { read: false })
-        .pipe(mocha({
-            reporter: 'list',
-            timeout: 5000
-        }));
+gulp.task('clean', () => {
+    return del.sync(['lib']);
 });
 
-gulp.task('clean', () => {
-    return del.sync([
-        'lib'
-    ]);
+gulp.task('test', () => {
+    gulp.src(['src/**/*.ts', 'test/**/*.ts'], { base: '.' })
+        .pipe(typescript(tsProject))
+        .pipe(babel())
+        .pipe(gulp.dest('.'))
+        .pipe(mocha({
+            reporter: 'progress',
+            timeout: 5000
+        }));
+
+    del.sync(['src/*.js', 'test/*.js']);
 });
 
 gulp.task('build', ['clean'], () => {

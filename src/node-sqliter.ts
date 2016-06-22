@@ -3,7 +3,7 @@
 
 import * as sqlite3 from "sqlite3";
 
-export module TYPE {
+export module Types {
     export const NONE = 'NONE';
     export const TEXT = 'TEXT';
     export const INTEGER = 'INTEGER';
@@ -17,12 +17,23 @@ export interface Model {
     options?: string
 }
 
+export interface ISqliter {
+    createTable (tableName: string, models: Model[], callback?: (err: Error) => void);
+    save (tableName: string, models: any[], callback?: (err: Error) => void);
+    find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void);
+    update (tableName: string, models: any[], wheres?: any[], callback?: (err: Error) => void);
+    run (query: string, callback?:  (err: Error) => void);
+    get (query: string, callback?: (err: Error, row: any) => void);
+    all (query: string, callback?: (err: Error, rows: any[]) => void);
+    each (query: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void);
+    close (callback?: (err: Error) => void);
+}
 
 
 /**
  * Sqliter
  */
-class Sqliter {
+class Sqliter implements ISqliter{
     private _db: sqlite3.Database;
 
     constructor(filename) {
@@ -43,7 +54,7 @@ class Sqliter {
         this._db.run(query, callback);
     }
 
-    save (tableName: string, models: any, callback?: (err: Error) => void) {
+    save (tableName: string, models: any[], callback?: (err: Error) => void) {
         const keys = Object.keys(models);
         const values = keys.map((key) => { return `"${models[key]}"`; });
 
@@ -52,10 +63,17 @@ class Sqliter {
         this._db.run(query, callback);
     }
 
-    find (tableName: string, wheres: any, callback?: (err: Error, row: any) => void) {
+    find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void) {
         const query = `SELECT * FROM ${tableName} WHERE ${wheres.join(' ')}`;
 
         this._db.get(query, callback);
+    }
+
+    update (tableName: string, models: any[], wheres?: any[], callback?: (err: Error) => void) {
+
+        const query = `UPDATE ${tableName} SET ${models} WHERE ${wheres.join(' ')}`;
+
+        this._db.run(query, callback);
     }
 
     run (query: string, callback?:  (err: Error) => void) {
@@ -84,6 +102,6 @@ class Sqliter {
  * @var {string} filename: DBファイルの名前
  * @return {Sqliter}
  */
-exports.connect = (filename: string): Sqliter => {
+export function connect(filename: string): ISqliter {
     return new Sqliter(filename);
-};
+}

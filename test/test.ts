@@ -1,43 +1,44 @@
 /// <reference path="../typings/index.d.ts" />
 
-const chai  = require('chai');
+import * as chai from 'chai';
+import * as del from 'del';
+
+import * as sqlite3 from 'sqlite3';
+import * as sqliter from '../src/node-sqliter';
+
 const expect = chai.expect;
-const del = require('del');
-
-const sqlite3 = require('sqlite3');
-const sqliter = require('../lib/node-sqliter');
-
 
 describe('node-sqliter', () => {
-    const filename = './test/test.db';
-    const tableName = 'testtable';
+    const file = './test/test.db';
+    const table = 'testtable';
 
-    var db, db3;
+    let db: sqliter.ISqliter;
+    let db3: sqlite3.Database;
 
     before(() => {
-        db = sqliter.connect(filename);
-        db3 = new sqlite3.Database(filename);
+        db = sqliter.connect(file);
+        db3 = new sqlite3.Database(file);
     });
 
     after(() => {
-        del.sync([filename]);
+        del.sync([file]);
     });
 
     it('create table', (done) => {
-        const query = `select count(*) from sqlite_master where type="table" and name = "${tableName}"`;
+        const query = `select count(*) from sqlite_master where type="table" and name = "${file}"`;
         const model = [
             {
                 field: 'id',
-                type : sqliter.TYPE.INTEGER
+                type : sqliter.Types.INTEGER
             },
             {
                 field: 'name',
-                type : sqliter.TYPE.TEXT
+                type : sqliter.Types.TEXT
             }
         ];
 
         const create = new Promise((resolve, reject) => {
-            db.createTable(tableName, model, (err, res) => {
+            db.createTable(file, model, (err) => {
                 resolve();
             });
         });
@@ -50,14 +51,16 @@ describe('node-sqliter', () => {
     });
 
     it('insert value', (done) => {
-        const query = `select id, name from ${tableName}`;
-        const model = {
-            id: '123',
-            name: 'test'
-        };
+        const query = `select id, name from ${file}`;
+        const model = [
+            {
+                id: '123',
+                name: 'test'
+            }
+        ];
 
         const save = new Promise((resolve, reject) => {
-            db.save(tableName, model, (err, res) => {
+            db.save(file, model, (err) => {
                 resolve();
             });
         });
@@ -72,10 +75,10 @@ describe('node-sqliter', () => {
 
     it('find value', (done) => {
         const wheres = ['id = 123'];
-        const query = `select * from ${tableName} where ${wheres.join(' ')}`;
+        const query = `select * from ${file} where ${wheres.join(' ')}`;
 
         const find = new Promise((resolve, reject) => {
-            db.find(tableName,  wheres, (err, row) => {
+            db.find(file,  wheres, (err, row) => {
                 resolve(row);
             });
         });
@@ -88,4 +91,3 @@ describe('node-sqliter', () => {
         });
     });
 });
-
