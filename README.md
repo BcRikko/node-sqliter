@@ -101,6 +101,12 @@ const updateField = { name: 'updated' };
 db.update('test.db', updateField, wheres, (err) => {
     console.log(err);
 });
+
+// delete
+const wheres = ['id = 11'];
+db.del('test.db', wheres, (err) => {
+    console.log(err);
+});
 ```
 
 

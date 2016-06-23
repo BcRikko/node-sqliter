@@ -158,4 +158,21 @@ describe('node-sqliter', () => {
         });
     });
 
+    it('delete value', (done) => {
+        const wheres = ['id = 3'];
+        const query = `select count(*) from ${table} where ${wheres.join(' ')}`;
+
+        const del = new Promise((resolve, reject) => {
+            db.del(table, wheres, (err) => {
+                resolve();
+            });
+        });
+        del.then(() => {
+            db3.get(query, (err, row) => {
+                expect(row['count(*)']).to.be.eq(0);
+                done();
+            });
+        });
+    });
+
 });

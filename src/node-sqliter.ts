@@ -18,12 +18,13 @@ export interface IModel {
 }
 
 export interface ISqliter {
-    createTable (tableName: string, models: IModel[], callback?: (err: Error) => void);
-    save (tableName: string, field: any, callback?: (err: Error) => void);
-    saveAll (tableName: string, fields: any[], callback?: (err: Error) => void);
-    find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void);
-    findAll (tableName: string, wheres: any[], callback?: (err: Error, rows: any[]) => void);
-    update (tableName: string, field: any, wheres?: any[], callback?: (err: Error) => void);
+    createTable (table: string, models: IModel[], callback?: (err: Error) => void);
+    save (table: string, field: any, callback?: (err: Error) => void);
+    saveAll (table: string, fields: any[], callback?: (err: Error) => void);
+    find (table: string, wheres: any[], callback?: (err: Error, row: any) => void);
+    findAll (table: string, wheres: any[], callback?: (err: Error, rows: any[]) => void);
+    update (table: string, field: any, wheres?: any[], callback?: (err: Error) => void);
+    del (table: string, wheres?: any[], callback?: (err: Error) => void);
     run (query: string, callback?:  (err: Error) => void);
     get (query: string, callback?: (err: Error, row: any) => void);
     all (query: string, callback?: (err: Error, rows: any[]) => void);
@@ -41,7 +42,7 @@ class Sqliter implements ISqliter{
         this._db = new sqlite3.Database(filename);
     }
 
-    createTable (tableName: string, models: IModel[], callback?: (err: Error) => void) {
+    createTable (table: string, models: IModel[], callback?: (err: Error) => void) {
         const params = models.map(model => {
             return [
                 model.field,
@@ -50,25 +51,25 @@ class Sqliter implements ISqliter{
             ].join(' ');
         });
 
-        const query = `CREATE TABLE IF NOT EXISTS ${tableName} ( ${params} )`;
+        const query = `CREATE TABLE IF NOT EXISTS ${table} ( ${params} )`;
 
         this._db.run(query, callback);
     }
 
-    save (tableName: string, field: any, callback?: (err: Error) => void) {
+    save (table: string, field: any, callback?: (err: Error) => void) {
         const keys = Object.keys(field);
         const values = keys.map((key) => { return `"${field[key]}"`; });
 
-        const query = `INSERT INTO ${tableName} ( ${keys.join(',')} ) VALUES ( ${values.join(',')} )`;
+        const query = `INSERT INTO ${table} ( ${keys.join(',')} ) VALUES ( ${values.join(',')} )`;
 
         this._db.run(query, callback);
     }
 
-    saveAll (tableName: string, fields: any[], callback?: (err: Error) => void) {
+    saveAll (table: string, fields: any[], callback?: (err: Error) => void) {
         const keys = Object.keys(fields[0]);
         const holder = keys.map(() => {return '?'; }).join(',');
 
-        let statement = this._db.prepare(`INSERT INTO ${tableName} ( ${keys.join(',')} ) VALUES ( ${holder} )`);
+        let statement = this._db.prepare(`INSERT INTO ${table} ( ${keys.join(',')} ) VALUES ( ${holder} )`);
         fields.forEach((model) => {
             const values = keys.map((key) => { return `${model[key]}`; });
             statement.run(values);
@@ -77,25 +78,31 @@ class Sqliter implements ISqliter{
         statement.finalize(callback);
     }
 
-    find (tableName: string, wheres: any[], callback?: (err: Error, row: any) => void) {
-        const query = `SELECT * FROM ${tableName} WHERE ${wheres.join(' ')}`;
+    find (table: string, wheres: any[], callback?: (err: Error, row: any) => void) {
+        const query = `SELECT * FROM ${table} WHERE ${wheres.join(' ')}`;
 
         this._db.get(query, callback);
     }
 
-    findAll (tableName: string, wheres: any[], callback?: (err: Error, rows: any[]) => void) {
-        const query = `SELECT * FROM ${tableName} WHERE ${wheres.join(' ')}`;
+    findAll (table: string, wheres: any[], callback?: (err: Error, rows: any[]) => void) {
+        const query = `SELECT * FROM ${table} WHERE ${wheres.join(' ')}`;
 
         this._db.all(query, callback);
     }
 
-    update (tableName: string, field: any, wheres?: any[], callback?: (err: Error) => void) {
+    update (table: string, field: any, wheres?: any[], callback?: (err: Error) => void) {
         let param = [];
         for (let key in field) {
             param.push(`${key} = "${field[key]}"`);
         }
 
-        const query = `UPDATE ${tableName} SET ${param.join(',')} WHERE ${wheres.join(' ')}`;
+        const query = `UPDATE ${table} SET ${param.join(',')} WHERE ${wheres.join(' ')}`;
+
+        this._db.run(query, callback);
+    }
+
+    del (table: string, wheres?: any[], callback?: (err: Error) => void) {
+        const query = `DELETE FROM ${table} WHERE ${wheres.join(' ')}`;
 
         this._db.run(query, callback);
     }
