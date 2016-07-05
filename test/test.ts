@@ -81,7 +81,13 @@ describe('node-sqliter', () => {
         const fields: IFields[] = [
             {id: 2, name: 'test02'},
             {id: 3, name: 'test03'},
-            {id: 4, name: 'test04'}
+            {id: 4, name: 'test04'},
+            {id: 5, name: 'test05'},
+            {id: 6, name: 'test06'},
+            {id: 7, name: 'test07'},
+            {id: 8, name: 'test08'},
+            {id: 9, name: 'test09'},
+            {id:10, name: 'test10'},
         ];
 
         const saveAll = new Promise((resolve, reject) => {
@@ -91,7 +97,7 @@ describe('node-sqliter', () => {
         });
         saveAll.then(() => {
             db3.get(query, (err, row) => {
-                expect(row['count(*)']).to.be.eq(4);
+                expect(row['count(*)']).to.be.eq(10);
                 done();
             });
         });
@@ -115,9 +121,10 @@ describe('node-sqliter', () => {
         });
     });
 
+
     it('find all value', (done) => {
-        const wheres = ['id > 2'];
-        const query = `select * from ${table} where ${wheres.join(' ')}`;
+        const wheres = ['id > 2', 'id < 5'];
+        const query = `select * from ${table} where ${wheres.join(' AND ')}`;
 
         const find = new Promise((resolve, reject) => {
             db.findAll(table,  wheres, (err, rows) => {

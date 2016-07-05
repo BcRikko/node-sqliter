@@ -79,13 +79,15 @@ class Sqliter implements ISqliter{
     }
 
     find (table: string, wheres: any[], callback?: (err: Error, row: any) => void) {
-        const query = `SELECT * FROM ${table} WHERE ${wheres.join(' ')}`;
+        const where = this._joinWhere(wheres);
+        const query = `SELECT * FROM ${table} WHERE ${where}`;
 
         this._db.get(query, callback);
     }
 
     findAll (table: string, wheres: any[], callback?: (err: Error, rows: any[]) => void) {
-        const query = `SELECT * FROM ${table} WHERE ${wheres.join(' ')}`;
+        const where = this._joinWhere(wheres);
+        const query = `SELECT * FROM ${table} WHERE ${where}`;
 
         this._db.all(query, callback);
     }
@@ -95,14 +97,15 @@ class Sqliter implements ISqliter{
         for (let key in field) {
             param.push(`${key} = "${field[key]}"`);
         }
-
-        const query = `UPDATE ${table} SET ${param.join(',')} WHERE ${wheres.join(' ')}`;
+        const where = this._joinWhere(wheres);
+        const query = `UPDATE ${table} SET ${param.join(',')} WHERE ${where}`;
 
         this._db.run(query, callback);
     }
 
     del (table: string, wheres?: any[], callback?: (err: Error) => void) {
-        const query = `DELETE FROM ${table} WHERE ${wheres.join(' ')}`;
+        const where = this._joinWhere(wheres);
+        const query = `DELETE FROM ${table} WHERE ${where}`;
 
         this._db.run(query, callback);
     }
@@ -125,6 +128,12 @@ class Sqliter implements ISqliter{
 
     close (callback?: (err: Error) => void) {
         this._db.close(callback);
+    }
+
+    _joinWhere (wheres: any[]): string {
+        return wheres.map((w) => {
+            return Array.isArray(w) ? `(${w.join(' OR ')})` : w;
+        }).join(' AND ');
     }
 }
 
