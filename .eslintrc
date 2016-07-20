@@ -11,10 +11,6 @@
   "extends": "eslint:recommended",
   "rules": {
     "strict": 1,
-    "linebreak-style": [
-        2,
-        "unix"
-    ],
     "semi": [
         2,
         "always"
