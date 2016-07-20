@@ -47,7 +47,11 @@ const models: sqliter.IModel[] = [
         type : sqliter.Types.TEXT
     }
 ];
-db.createTable('ex-table', models, (err) => {
+
+db.createTable('test.db', models).then(() => {
+    // success
+}).catch((err) => {
+    // failure
     console.log(err);
 });
 ```
@@ -66,9 +70,13 @@ const field: IField = {
     id: 10,
     name: 'test01'
 };
-db.save('test.db', field, (err) => {
+db.save('test.db', field).then(() => {
+    // success
+}).catch((err) => {
+    // failure
     console.log(err);
 });
+
 
 // multiple save
 const fields: IField[] = [
@@ -76,35 +84,55 @@ const fields: IField[] = [
     { id: 12, name: 'test03' },
     { id: 13, name: 'test04' }
 ];
-db.saveAll('test.db', fields, (err) => {
+db.saveAll('test.db', fields).then(() => {
+    // success
+}).catch((err) => {
+    // failure
     console.log(err);
-})
+});
+
 
 // find
 const where = ['id = 11'];
-db.find('test.db', where, (err, row) => {
-    console.log(row['id']);
-    console.log(row['name']);
+db.find('test.db', where).then((result: IField) => {
+    // success
+    console.log(result.id);
+    console.log(result.name);
+}).catch((err) => {
+    // failure
+    console.log(err);
 });
 
+
 // find all
-const wheres = ['id = 11', 'AND name = "test03"'];
-db.findAll('test.db', wheres, (err, rows) => {
-    rows.forEach((row) => {
-        console.log(row['id'], row['name']);
+const wheres = ['id = 11', 'name = "test03"'];
+db.findAll('test.db', wheres).then((results: IField[]) => {
+    results.forEach((row) => {
+        console.log(row.id, row.name);
     });
+}).catch((err) => {
+    // failure
+    console.log(err);
 });
+
 
 // update
 const wheres = ['id = 11'];
 const updateField = { name: 'updated' };
-db.update('test.db', updateField, wheres, (err) => {
+db.update('test.db', updateField, wheres).then(() => {
+    // success
+}).catch((err) => {
+    // failure
     console.log(err);
 });
 
+
 // delete
 const wheres = ['id = 11'];
-db.del('test.db', wheres, (err) => {
+db.del('test.db', wheres).then(() => {
+    // success
+}).catch((err) => {
+    // failure
     console.log(err);
 });
 ```

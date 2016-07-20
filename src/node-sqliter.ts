@@ -18,17 +18,23 @@ export interface IModel {
 }
 
 export interface ISqliter {
-    createTable (table: string, models: IModel[], callback?: (err: Error) => void);
-    save (table: string, field: any, callback?: (err: Error) => void);
-    saveAll (table: string, fields: any[], callback?: (err: Error) => void);
-    find (table: string, wheres: any[], callback?: (err: Error, row: any) => void);
-    findAll (table: string, wheres: any[], callback?: (err: Error, rows: any[]) => void);
-    update (table: string, field: any, wheres?: any[], callback?: (err: Error) => void);
-    del (table: string, wheres?: any[], callback?: (err: Error) => void);
-    run (query: string, callback?:  (err: Error) => void);
-    get (query: string, callback?: (err: Error, row: any) => void);
-    all (query: string, callback?: (err: Error, rows: any[]) => void);
+    createTable (table: string, models: IModel[]): Promise<void>;
+
+    save (table: string, field: any): Promise<void>;
+    saveAll (table: string, fields: any[]): Promise<void>;
+
+    find (table: string, wheres: any[]): Promise<any>;
+    findAll (table: string, wheres: any[]): Promise<any[]>;
+
+    update (table: string, fields: any, wheres?: any[]): Promise<void>;
+
+    del (table: string, wheres?: any[]): Promise<void>;
+
+    run (query: string): Promise<void>;
+    get (query: string): Promise<any>;
+    all (query: string): Promise<any[]>;
     each (query: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void);
+
     close (callback?: (err: Error) => void);
 }
 
@@ -42,7 +48,7 @@ class Sqliter implements ISqliter{
         this._db = new sqlite3.Database(filename);
     }
 
-    createTable (table: string, models: IModel[], callback?: (err: Error) => void) {
+    createTable (table: string, models: IModel[]): Promise<void> {
         const params = models.map(model => {
             return [
                 model.field,
@@ -53,19 +59,36 @@ class Sqliter implements ISqliter{
 
         const query = `CREATE TABLE IF NOT EXISTS ${table} ( ${params} )`;
 
-        this._db.run(query, callback);
+        return new Promise<void>((resolve, reject) => {
+            this._db.run(query, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+
+            });
+        });
     }
 
-    save (table: string, field: any, callback?: (err: Error) => void) {
+    save (table: string, field: any): Promise<void> {
         const keys = Object.keys(field);
         const values = keys.map((key) => { return `"${field[key]}"`; });
 
         const query = `INSERT INTO ${table} ( ${keys.join(',')} ) VALUES ( ${values.join(',')} )`;
 
-        this._db.run(query, callback);
+        return new Promise<void>((resolve, reject) => {
+            this._db.run(query, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 
-    saveAll (table: string, fields: any[], callback?: (err: Error) => void) {
+    saveAll (table: string, fields: any[]): Promise<void> {
         const keys = Object.keys(fields[0]);
         const holder = keys.map(() => {return '?'; }).join(',');
 
@@ -75,51 +98,112 @@ class Sqliter implements ISqliter{
             statement.run(values);
         });
 
-        statement.finalize(callback);
+        return new Promise<void>((resolve, reject) => {
+            statement.finalize((err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 
-    find (table: string, wheres: any[], callback?: (err: Error, row: any) => void) {
-        const where = this._joinWhere(wheres);
-        const query = `SELECT * FROM ${table} WHERE ${where}`;
+    find (table: string, wheres: any[]): Promise<any> {
+        const query = `SELECT * FROM ${table}` + this._joinWhere(wheres);;
 
-        this._db.get(query, callback);
+        return new Promise((resolve, reject) => {
+            this._db.get(query, (err, row) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
     }
 
-    findAll (table: string, wheres: any[], callback?: (err: Error, rows: any[]) => void) {
-        const where = this._joinWhere(wheres);
-        const query = `SELECT * FROM ${table} WHERE ${where}`;
+    findAll (table: string, wheres: any[]): Promise<any[]> {
+        const query = `SELECT * FROM ${table}` + this._joinWhere(wheres);
 
-        this._db.all(query, callback);
+        return new Promise((resolve, reject) => {
+            this._db.all(query, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
     }
 
-    update (table: string, field: any, wheres?: any[], callback?: (err: Error) => void) {
+    update (table: string, fields: any, wheres?: any[]): Promise<void> {
         let param = [];
-        for (let key in field) {
-            param.push(`${key} = "${field[key]}"`);
+        for (let key in fields) {
+            param.push(`${key} = "${fields[key]}"`);
         }
-        const where = this._joinWhere(wheres);
-        const query = `UPDATE ${table} SET ${param.join(',')} WHERE ${where}`;
 
-        this._db.run(query, callback);
+        const query = `UPDATE ${table} SET ${param.join(',')}` + this._joinWhere(wheres);
+
+        return new Promise<void>((resolve, reject) => {
+            this._db.run(query, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 
-    del (table: string, wheres?: any[], callback?: (err: Error) => void) {
-        const where = this._joinWhere(wheres);
-        const query = `DELETE FROM ${table} WHERE ${where}`;
+    del (table: string, wheres?: any[]): Promise<void> {
+        const query = `DELETE FROM ${table}` + this._joinWhere(wheres);
 
-        this._db.run(query, callback);
+        return new Promise<void>((resolve, reject) => {
+            this._db.run(query, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 
-    run (query: string, callback?:  (err: Error) => void) {
-        this._db.run(query, callback);
+    run (query: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this._db.run(query, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 
-    get (query: string, callback?: (err: Error, row: any) => void) {
-        this._db.get(query, callback);
+    get (query: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this._db.get(query, (err, row) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
     }
 
-    all (query: string, callback?: (err: Error, rows: any[]) => void) {
-        this._db.all(query, callback);
+    all (query: string): Promise<any[]> {
+        return new Promise((resolve, reject) => {
+            this._db.all(query, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows);
+                }
+            });
+        });
     }
 
     each (query: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void) {
@@ -130,10 +214,12 @@ class Sqliter implements ISqliter{
         this._db.close(callback);
     }
 
-    _joinWhere (wheres: any[]): string {
-        return wheres.map((w) => {
+    private _joinWhere (wheres: any[]): string {
+        const condition = wheres && wheres.map((w) => {
             return Array.isArray(w) ? `(${w.join(' OR ')})` : w;
         }).join(' AND ');
+
+        return condition ? ` WHERE ${condition}` : '';
     }
 }
 

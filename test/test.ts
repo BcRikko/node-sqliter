@@ -8,7 +8,7 @@ import * as sqliter from '../src/node-sqliter';
 
 const expect = chai.expect;
 
-interface IFields {
+interface IField {
     id: number,
     name?: string
 }
@@ -31,7 +31,7 @@ describe('node-sqliter', () => {
 
     it('create table', (done) => {
         const query = `select count(*) from sqlite_master where type="table" and name = "${table}"`;
-        const model: sqliter.IModel[] = [
+        const models: sqliter.IModel[] = [
             {
                 field: 'id',
                 type : sqliter.Types.INTEGER
@@ -42,43 +42,39 @@ describe('node-sqliter', () => {
             }
         ];
 
-        const create = new Promise((resolve, reject) => {
-            db.createTable(table, model, (err) => {
-                resolve();
-            });
-        });
-        create.then(() => {
+        db.createTable(table, models).then(() => {
             db3.get(query, (err, row) => {
                 expect(row['count(*)']).to.be.eq(1);
                 done();
             });
+
+        }).catch((err) => {
+            console.log(err);
         });
     });
 
     it('insert value', (done) => {
         const query = `select id, name from ${table}`;
-        const fields: IFields = {
+        const field: IField = {
             id: 1,
             name: 'test01'
         };
 
-        const save = new Promise((resolve, reject) => {
-            db.save(table, fields, (err) => {
-                resolve();
-            });
-        });
-        save.then(() => {
+        db.save(table, field).then(() => {
             db3.get(query, (err, row) => {
-                expect(row['id']).to.be.eq(1);
-                expect(row['name']).to.be.eq('test01');
+                expect(row.id).to.be.eq(1);
+                expect(row.name).to.be.eq('test01');
                 done();
             });
+
+        }).catch((err) => {
+            console.log(err);
         });
     });
 
     it('insert all', (done) => {
         const query = `select count(*) from ${table}`;
-        const fields: IFields[] = [
+        const fields: IField[] = [
             {id: 2, name: 'test02'},
             {id: 3, name: 'test03'},
             {id: 4, name: 'test04'},
@@ -90,16 +86,14 @@ describe('node-sqliter', () => {
             {id:10, name: 'test10'},
         ];
 
-        const saveAll = new Promise((resolve, reject) => {
-            db.saveAll(table, fields, () => {
-                resolve();
-            });
-        });
-        saveAll.then(() => {
+        db.saveAll(table, fields).then(() => {
             db3.get(query, (err, row) => {
                 expect(row['count(*)']).to.be.eq(10);
                 done();
             });
+
+        }).catch((err) => {
+            console.log(err);
         });
     });
 
@@ -107,31 +101,23 @@ describe('node-sqliter', () => {
         const wheres = ['id = 2'];
         const query = `select * from ${table} where ${wheres.join(' ')}`;
 
-        const find = new Promise((resolve, reject) => {
-            db.find(table,  wheres, (err, row) => {
-                resolve(row);
-            });
-        });
-        find.then((result) => {
+        db.find(table, wheres).then((result: IField) => {
             db3.get(query, (err, row) => {
-                expect(result['id']).to.be.eq(row['id']);
-                expect(result['name']).to.be.eq(row['name']);
+                expect(result.id).to.be.eq(row.id);
+                expect(result.name).to.be.eq(row.name);
                 done();
             });
+
+        }).catch((err) => {
+            console.log(err);
         });
     });
-
 
     it('find all value', (done) => {
         const wheres = ['id > 2', 'id < 5'];
         const query = `select * from ${table} where ${wheres.join(' AND ')}`;
 
-        const find = new Promise((resolve, reject) => {
-            db.findAll(table,  wheres, (err, rows) => {
-                resolve(rows);
-            });
-        });
-        find.then((results: any[]) => {
+        db.findAll(table, wheres).then((results: IField[]) => {
             db3.all(query, (err, rows) => {
                 expect(results.length).to.be.eq(rows.length);
 
@@ -141,6 +127,9 @@ describe('node-sqliter', () => {
 
                 done();
             });
+
+        }).catch((err) => {
+            console.log(err);
         });
     });
 
@@ -148,20 +137,18 @@ describe('node-sqliter', () => {
         const wheres = ['id = 3'];
         const query = `select * from ${table} where ${wheres.join(' ')}`;
 
-        const field = {
+        const fields = {
             name: 'updated'
         };
 
-        const update = new Promise((resolve, reject) => {
-            db.update(table, field, wheres, (err) => {
-                resolve();
-            });
-        });
-        update.then(() => {
+        db.update(table, fields, wheres).then(() => {
             db3.get(query, (err, row) => {
-                expect(row['name']).to.be.eq('updated');
+                expect(row.name).to.be.eq('updated');
                 done();
             });
+
+        }).catch((err) => {
+            console.log(err);
         });
     });
 
@@ -169,16 +156,14 @@ describe('node-sqliter', () => {
         const wheres = ['id = 3'];
         const query = `select count(*) from ${table} where ${wheres.join(' ')}`;
 
-        const del = new Promise((resolve, reject) => {
-            db.del(table, wheres, (err) => {
-                resolve();
-            });
-        });
-        del.then(() => {
+        db.del(table, wheres).then(() => {
             db3.get(query, (err, row) => {
                 expect(row['count(*)']).to.be.eq(0);
                 done();
             });
+
+        }).catch((err) => {
+            console.log(err);
         });
     });
 
