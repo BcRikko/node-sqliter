@@ -6,7 +6,11 @@ import * as del from 'del';
 import * as sqlite3 from 'sqlite3';
 import * as sqliter from '../src/node-sqliter';
 
+require('babel-polyfill');  // regeneratorRuntime is not defined 対策
+const co = require('co');
+
 const expect = chai.expect;
+
 
 interface IField {
     id: number,
@@ -167,4 +171,75 @@ describe('node-sqliter', () => {
         });
     });
 
+    it('serial processing', (done) => {
+        const field: IField = {
+            id: 1,
+            name: 'test01'
+        };
+
+        co(function *() {
+            yield db.save(table, field);
+
+            const res1 = yield db.find(table, ['id = 1']);
+            expect(res1.id).to.be.eq(1);
+            expect(res1.name).to.be.eq('test01');
+
+            yield db.update(table, { name: 'updated' }, ['id = 1']);
+
+
+            const res2 = yield db.find(table, ['id = 1']);
+            expect(res2.id).to.be.eq(1);
+            expect(res2.name).to.be.eq('updated');
+
+            yield db.del(table, []);
+
+            yield done();
+        });
+    });
+
+    it('parallels processing', (done) => {
+        const query = `select count(*) from ${table}`;
+
+        const field1: IField = {
+            id: 1,
+            name: 'test01'
+        };
+        const field2: IField = {
+            id: 2,
+            name: 'test02'
+        };
+        const field3: IField = {
+            id: 3,
+            name: 'test03'
+        };
+
+        const saveTasks = [
+            db.save(table, field1),
+            db.save(table, field2),
+            db.save(table, field3)
+        ];
+
+        Promise.all(saveTasks).then(() => {
+            db3.get(query, (err, row) => {
+                expect(row['count(*)']).to.be.eq(3);
+            });
+        });
+
+        const findTasks = [
+            db.find(table, ['id = 1']),
+            db.find(table, ['id = 2']),
+            db.find(table, ['id = 3'])
+        ];
+
+        Promise.all(findTasks).then((results) => {
+            results.sort((a: any, b: any) => {
+                return a.id > b.id ? 1 : 0
+
+            }).forEach((result: any, i) => {
+                expect(result.id).to.be.eq(i + 1);
+                expect(result.name).to.be.eq(`test0${i + 1}`);
+            });
+            done();
+        });
+    });
 });
