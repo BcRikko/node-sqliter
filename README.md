@@ -138,6 +138,62 @@ db.del('test.db', wheres).then(() => {
 ```
 
 
+### Serial
+
+```js
+require('babel-polyfill');  // regeneratorRuntime is not definedになるため
+const co = require('co');
+
+const serialField: IField = {
+    id: 1,
+    name: 'test01'
+};
+
+co(function *() {
+    yield db.save('test.db', serialField);
+
+    const res1 = yield db.find('test.db', ['id = 1']);
+    console.log(`id:${res1.id}, name:${res1.name}`);
+
+    yield db.update('test.db', { name: 'updated' }, ['id = 1']);
+
+    const res2 = yield db.find('test.db', ['id - 1']);
+    console.log(`id:${res1.id}, name:${res1.name}`);
+
+    yield db.delete('test.db', []);
+});
+```
+
+
+### Parallel
+
+```js
+const saveTasks = [
+    db.save('test.db', { id: 1, name: 'test01' }),
+    db.save('test.db', { id: 2, name: 'test02' }),
+    db.save('test.db', { id: 3, name: 'test03' })
+];
+
+Promise.all(saveTasks).then(() => {
+    console.log('save');
+});
+
+
+const findTasks = [
+    db.save('test.db', ['id = 1']),
+    db.save('test.db', ['id = 2']),
+    db.save('test.db', ['id = 3'])
+];
+
+Promise.all(findTasks).then((results: any) => {
+    results.forEach((result) => {
+        console.log(`id: ${result.id}, name: ${result.name}`);
+    });
+});
+```
+
+
+
 Testing
 ----
 
