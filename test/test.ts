@@ -13,7 +13,7 @@ const expect = chai.expect;
 
 
 interface IField {
-    id: number,
+    id?  : number,
     name?: string
 }
 
@@ -105,7 +105,7 @@ describe('node-sqliter', () => {
         const wheres = ['id = 2'];
         const query = `select * from ${table} where ${wheres.join(' ')}`;
 
-        db.find(table, wheres).then((result: IField) => {
+        db.find<IField>(table, wheres).then((result) => {
             db3.get(query, (err, row) => {
                 expect(result.id).to.be.eq(row.id);
                 expect(result.name).to.be.eq(row.name);
@@ -121,7 +121,7 @@ describe('node-sqliter', () => {
         const wheres = ['id > 2', 'id < 5'];
         const query = `select * from ${table} where ${wheres.join(' AND ')}`;
 
-        db.findAll(table, wheres).then((results: IField[]) => {
+        db.findAll<IField>(table, wheres).then((results) => {
             db3.all(query, (err, rows) => {
                 expect(results.length).to.be.eq(rows.length);
 
@@ -141,7 +141,7 @@ describe('node-sqliter', () => {
         const wheres = ['id = 3'];
         const query = `select * from ${table} where ${wheres.join(' ')}`;
 
-        const fields = {
+        const fields: IField = {
             name: 'updated'
         };
 

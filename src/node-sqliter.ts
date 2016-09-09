@@ -20,20 +20,20 @@ export interface IModel {
 export interface ISqliter {
     createTable (table: string, models: IModel[]): Promise<void>;
 
-    save (table: string, field: any): Promise<void>;
-    saveAll (table: string, fields: any[]): Promise<void>;
+    save<T>(table: string, field: T): Promise<void>;
+    saveAll<T>(table: string, fields: T[]): Promise<void>;
 
-    find (table: string, wheres: any[]): Promise<any>;
-    findAll (table: string, wheres: any[]): Promise<any[]>;
+    find<T>(table: string, wheres: any[]): Promise<T>;
+    findAll<T>(table: string, wheres: any[]): Promise<T[]>;
 
-    update (table: string, fields: any, wheres?: any[]): Promise<void>;
+    update<T,U>(table: string, fields: T, wheres?: U[]): Promise<void>;
 
-    del (table: string, wheres?: any[]): Promise<void>;
+    del<T>(table: string, wheres?: T[]): Promise<void>;
 
     run (query: string): Promise<void>;
-    get (query: string): Promise<any>;
-    all (query: string): Promise<any[]>;
-    each (query: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void);
+    get<T>(query: string): Promise<T>;
+    all<T>(query: string): Promise<T[]>;
+    each<T>(query: string, callback?: (err: Error, row: T) => void, complete?: (err: Error, count: number) => void);
 
     close (callback?: (err: Error) => void);
 }
@@ -71,7 +71,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    save (table: string, field: any): Promise<void> {
+    save<T>(table: string, field: T): Promise<void> {
         const keys = Object.keys(field);
         const values = keys.map((key) => { return `"${field[key]}"`; });
 
@@ -88,7 +88,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    saveAll (table: string, fields: any[]): Promise<void> {
+    saveAll<T>(table: string, fields: T[]): Promise<void> {
         const keys = Object.keys(fields[0]);
         const holder = keys.map(() => {return '?'; }).join(',');
 
@@ -109,7 +109,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    find (table: string, wheres: any[]): Promise<any> {
+    find<T>(table: string, wheres: any[]): Promise<T> {
         const query = `SELECT * FROM ${table}` + this._joinWhere(wheres);;
 
         return new Promise((resolve, reject) => {
@@ -123,7 +123,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    findAll (table: string, wheres: any[]): Promise<any[]> {
+    findAll<T>(table: string, wheres: any[]): Promise<T[]> {
         const query = `SELECT * FROM ${table}` + this._joinWhere(wheres);
 
         return new Promise((resolve, reject) => {
@@ -137,7 +137,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    update (table: string, fields: any, wheres?: any[]): Promise<void> {
+    update<T,U>(table: string, fields: T, wheres?: U[]): Promise<void> {
         let param = [];
         for (let key in fields) {
             param.push(`${key} = "${fields[key]}"`);
@@ -156,7 +156,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    del (table: string, wheres?: any[]): Promise<void> {
+    del<T>(table: string, wheres?: T[]): Promise<void> {
         const query = `DELETE FROM ${table}` + this._joinWhere(wheres);
 
         return new Promise<void>((resolve, reject) => {
@@ -182,7 +182,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    get (query: string): Promise<any> {
+    get<T>(query: string): Promise<T> {
         return new Promise((resolve, reject) => {
             this._db.get(query, (err, row) => {
                 if (err) {
@@ -194,7 +194,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    all (query: string): Promise<any[]> {
+    all<T>(query: string): Promise<T[]> {
         return new Promise((resolve, reject) => {
             this._db.all(query, (err, rows) => {
                 if (err) {
@@ -206,7 +206,7 @@ class Sqliter implements ISqliter{
         });
     }
 
-    each (query: string, callback?: (err: Error, row: any) => void, complete?: (err: Error, count: number) => void) {
+    each<T>(query: string, callback?: (err: Error, row: T) => void, complete?: (err: Error, count: number) => void) {
         this._db.each(query, callback, complete);
     }
 
